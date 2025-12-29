@@ -45,7 +45,7 @@ Our animations are so buttery smooth, you'll wonder if we secretly bribed the `r
 
 See it in action before you inevitably fork it and add your own "essential" features:
 
-[Live Demo Here (coming soon, after we figure out hosting that isn't a potato server)]
+[Live Demo Here (https://abhiraj7575.github.io/Time-Based-Website/)]
 
 ---
 
