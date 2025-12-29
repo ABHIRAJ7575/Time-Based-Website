@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time OS - Futuristic Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ctext x=\'50%25\' y=\'50%25\' style=\'dominant-baseline:central;text-anchor:middle;font-size:90px;\'%3E%E2%8F%B0%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Global Resets and Base Styles */
+        :root {
+            /* --- Base Theme Colors (Elegant Dark Grey + Soft Dim Glass Frost) --- */
+            --bg-dark-grey: #121212;
+            --bg-medium-grey: #1a1a1a;
+            --bg-light-grey: #2a2a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --glass-bg: rgba(255, 255, 255, 0.05); /* Very subtle white tint for glass */
+            --glass-border: rgba(255, 255, 255, 0.08); /* Subtle border for glass */
+            --soft-shadow-color: rgba(0, 0, 0, 0.4);
+
+            /* --- Accent Colors (Low Intensity) --- */
+            --accent-blue: #007bff; /* Electric Blue, low intensity */
+            --accent-aqua: #00bcd4; /* Aqua, low intensity */
+            --accent-violet: #8a2be2; /* Violet, low intensity */
+
+            /* --- Glassmorphism Properties --- */
+            --glass-blur: 20px; /* Increased blur for premium feel */
+            --card-border-radius: 28px; /* Softer, larger rounded corners */
+
+            /* --- Typography --- */
+            --font-family-body: 'Poppins', sans-serif;
+            --font-family-numbers: 'JetBrains Mono', monospace;
+            --heading-weight: 600;
+            --subheading-weight: 500;
+
+            /* --- Transitions & Animations --- */
+            --transition-speed: 0.4s;
+            --transition-ease: cubic-bezier(0.22, 1, 0.36, 1); /* Smoother easing */
+            --ripple-color: rgba(255, 255, 255, 0.15); /* Softer ripple */
+
+            /* --- Theme Specific Accents (Dynamic) --- */
+            /* Morning: Subtle Gold + Blue */
+            --morning-accent-color: #ffc107; /* Muted Gold */
+            --morning-gradient-start: #0a0a20;
+            --morning-gradient-end: #1a1a30;
+
+            /* Night: Subtle Violet + Aqua */
+            --night-accent-color: #9c27b0; /* Muted Violet */
+            --night-gradient-start: #000000;
+            --night-gradient-end: #1a002a;
+
+            /* Current Theme Variables - will be updated by JS */
+            --current-accent: var(--night-accent-color);
+            --current-bg-gradient-start: var(--bg-dark-grey);
+            --current-bg-gradient-end: var(--bg-medium-grey);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family-body);
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--current-bg-gradient-start), var(--current-bg-gradient-end));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            overflow-x: hidden;
+            transition: background var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Utility Classes */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 4px 16px var(--soft-shadow-color), inset 0 0 0 1px var(--glass-border); /* Soft shadow + frosted inner border */
+            padding: 30px; /* More spacing */
+            transition: all var(--transition-speed) var(--transition-ease);
+            position: relative;
+            overflow: hidden; /* For ripple effect */
+        }
+
+        .glass-card:hover {
+            transform: translateY(-3px) scale(1.01); /* Soft scale-up */
+            box-shadow: 0 8px 32px var(--soft-shadow-color), inset 0 0 0 1px var(--glass-border), 0 0 15px rgba(255, 255, 255, 0.05); /* Subtle ambient glow */
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, var(--accent-blue), var(--accent-aqua));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.1); /* Micro-glow for text */
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--accent-blue), var(--accent-aqua));
+            color: var(--text-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 14px; /* Softer button corners */
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: var(--subheading-weight);
+            letter-spacing: 0.5px;
+            transition: all var(--transition-speed) var(--transition-ease);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Floating shadow */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.1); /* Enhanced floating shadow + subtle glow */
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Ripple Effect for Buttons */
+        .btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--ripple-color);
+            animation: ripple-effect 0.6s linear forwards;
+            transform: scale(0);
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        /* Layout Structure */
+        main {
+            width: 90%;
+            max-width: 1400px;
+            margin: 40px auto; /* More vertical spacing */
+            display: flex;
+            flex-direction: column;
+            gap: 30px; /* Increased gap */
+        }
+
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px; /* More padding */
+            background: linear-gradient(45deg, var(--current-bg-gradient-start), var(--current-bg-gradient-end)); /* Base gradient */
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); /* Deeper shadow */
+            position: relative;
+            overflow: hidden;
+            min-height: 350px;
+            transition: background var(--transition-speed) var(--transition-ease);
+        }
+
+        /* Frosted background effect for hero section */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            background: rgba(255, 255, 255, 0.03); /* Very subtle frosted layer */
+            backdrop-filter: blur(calc(var(--glass-blur) / 2)); /* Slightly less blur than cards */
+            -webkit-backdrop-filter: blur(calc(var(--glass-blur) / 2));
+            border-radius: var(--card-border-radius);
+            z-index: -1;
+        }
+
+        .greeting {
+            font-family: var(--font-family-body);
+            font-size: 2.8em;
+            font-weight: var(--heading-weight);
+            margin-bottom: 25px;
+            text-align: center;
+            color: var(--text-primary);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1); /* Micro-glow */
+            transition: text-shadow var(--transition-speed) var(--transition-ease);
+        }
+
+        .hybrid-clock {
+            display: flex;
+            align-items: center;
+            gap: 50px; /* More spacing */
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .digital-clock {
+            font-family: var(--font-family-numbers);
+            font-size: 4.5em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #ffffff; /* Smooth white */
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.15); /* Micro-glow for digits */
+            transition: text-shadow var(--transition-speed) var(--transition-ease);
+        }
+
+        .analog-clock {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 1px solid var(--glass-border); /* Thinner, subtle border */
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.05); /* Soft shadow, subtle inner glow */
+            transition: border-color var(--transition-speed) var(--transition-ease), box-shadow var(--transition-speed) var(--transition-ease);
+            background: rgba(255, 255, 255, 0.02); /* Very subtle background */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .analog-clock::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: var(--current-accent); /* Accent color for center dot */
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 5px var(--current-accent); /* Subtle glow */
+        }
+
+        .hand {
+            --rotation: 0;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            background: var(--text-primary);
+            border-radius: 3px;
+            transform: translateX(-50%) rotate(var(--rotation));
+            transition: background var(--transition-speed) var(--transition-ease);
+        }
+
+        .hour-hand {
+            width: 5px;
+            height: 55px;
+            background: var(--current-accent); /* Accent color for hour hand */
+            box-shadow: 0 0 3px var(--current-accent);
+        }
+        .minute-hand {
+            width: 3px;
+            height: 75px;
+            background: var(--text-primary);
+        }
+        .second-hand {
+            width: 1.5px;
+            height: 85px;
+            background: var(--accent-blue); /* Distinct color for second hand */
+            box-shadow: 0 0 2px var(--accent-blue);
+        }
+
+        .tools-panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Adjusted min-width for larger cards */
+            gap: 30px; /* More spacing between cards */
+            margin-top: 30px;
+        }
+
+        .tool-card {
+            padding: 35px; /* More internal padding */
+            min-height: 280px; /* Uniform size consideration */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+        }
+
+        .tool-card h2 {
+            font-family: var(--font-family-body);
+            font-size: 1.9em;
+            font-weight: var(--heading-weight);
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.08); /* Subtle text shadow */
+            transition: text-shadow var(--transition-speed) var(--transition-ease);
+        }
+
+        /* World Time Dashboard */
+        .world-time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Adjusted for more cities */
+            gap: 18px; /* Spacing */
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        .world-time-card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s var(--transition-ease);
+            cursor: pointer;
+            height: 130px;
+        }
+
+        .world-time-card:hover {
+            transform: rotateY(5deg) scale(1.02); /* Softer 3D effect and scale */
+        }
+
+        .world-time-card .city-name {
+            font-weight: var(--subheading-weight);
+            margin-bottom: 8px;
+            color: var(--current-accent); /* Accent color for city name */
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.05);
+        }
+
+        .world-time-card .time-display {
+            font-family: var(--font-family-numbers);
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .world-time-card .date-display {
+            font-size: 0.85em;
+            opacity: 0.7;
+            color: var(--text-secondary);
+        }
+
+        /* Stopwatch & Countdown & Pomodoro */
+        .timer-display {
+            font-family: var(--font-family-numbers);
+            font-size: 3.2em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.15); /* Micro-glow */
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .lap-list {
+            list-style: none;
+            margin-top: 25px;
+            max-height: 180px; /* Increased height */
+            overflow-y: auto;
+            width: 100%;
+            text-align: left;
+            padding-right: 12px;
+        }
+
+        .lap-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .lap-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+
+        .lap-list::-webkit-scrollbar-thumb {
+            background: var(--accent-blue); /* Accent color for scrollbar */
+            border-radius: 10px;
+        }
+
+        .lap-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 18px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slide-in 0.6s forwards var(--transition-ease);
+            font-family: var(--font-family-numbers);
+            color: var(--text-secondary);
+        }
+
+        @keyframes slide-in {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .lap-item span:first-child {
+            font-weight: var(--subheading-weight);
+            color: var(--text-primary);
+        }
+
+        /* Circular Progress Bar */
+        .circular-progress-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 25px auto;
+        }
+
+        .circular-progress-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .circular-progress-bar {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--current-accent) var(--progress, 0%), transparent var(--progress, 0%));
+            transition: background 0.1s linear;
+            box-shadow: 0 0 8px var(--current-accent); /* Subtle glow */
+        }
+
+        .circular-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-family-numbers);
+            font-size: 2em;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Countdown specific */
+        .countdown-input-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            font-family: var(--font-family-numbers);
+            color: var(--text-secondary);
+        }
+
+        .countdown-input-group input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-size: 1em;
+            width: 70px;
+            text-align: center;
+            outline: none;
+            transition: all var(--transition-speed) var(--transition-ease);
+        }
+
+        .countdown-input-group input:focus {
+            box-shadow: 0 0 10px var(--accent-aqua), inset 0 0 0 1px var(--accent-aqua);
+            border-color: var(--accent-aqua);
+        }
+
+        .celebration-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 100;\n            border-radius: var(--card-border-radius);\n        }
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-aqua); /* Muted confetti colors */
+            opacity: 0;
+            animation: confetti-fall 2s forwards ease-out;
+            border-radius: 50%; /* Make them dots */
+        }
+        @keyframes confetti-fall {
+            0% { transform: translate(var(--x), var(--y)) rotate(0deg) scale(0); opacity: 1; }
+            100% { transform: translate(var(--x-end), var(--y-end)) rotate(720deg) scale(1); opacity: 0; }
+        }
+
+        /* Pomodoro Timer */
+        .pomodoro-modes {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .pomodoro-modes .btn {
+            padding: 10px 18px;
+            font-size: 0.85em;
+            background: rgba(255, 255, 255, 0.08); /* Subtler background for inactive mode buttons */
+            box-shadow: none;
+        }
+        .pomodoro-modes .btn.active {
+            background: linear-gradient(45deg, var(--accent-blue), var(--accent-aqua));
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .pomodoro-modes .btn:hover {
+             transform: translateY(-1px);
+             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 5px rgba(255, 255, 255, 0.05);
+        }
+        .pomodoro-status {
+            font-size: 1.1em;
+            margin-top: 15px;
+            color: var(--text-secondary);
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Time Difference Calculator */
+        .time-diff-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+        .time-diff-inputs input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: var(--text-primary);
+            font-size: 1em;
+            outline: none;
+            transition: all var(--transition-speed) var(--transition-ease);
+            width: 100%;
+            font-family: var(--font-family-numbers);
+        }
+        .time-diff-inputs input:focus {
+            box-shadow: 0 0 10px var(--accent-violet), inset 0 0 0 1px var(--accent-violet);
+            border-color: var(--accent-violet);
+        }
+        .time-diff-result {
+            font-family: var(--font-family-numbers);
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Day Progress */
+        .day-progress-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 25px auto;
+        }
+
+        .day-progress-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .day-progress-bar {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--current-accent) var(--day-progress, 0%), transparent var(--day-progress, 0%));
+            transition: background 0.1s linear;
+            box-shadow: 0 0 10px var(--current-accent); /* Subtle glow */
+        }
+
+        .day-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-family-numbers);
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 7px rgba(255, 255, 255, 0.12);
+        }
+
+        /* Footer */
+        footer {
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 50px;
+            color: var(--text-secondary);
+        }
+
+        .social-icons {
+            margin-bottom: 15px;
+        }
+
+        .social-icons a {
+            color: var(--text-secondary);
+            font-size: 1.6em;
+            margin: 0 15px;
+            text-decoration: none;
+            transition: color var(--transition-speed) var(--transition-ease), text-shadow var(--transition-speed) var(--transition-ease);
+        }
+
+        .social-icons a:hover {
+            color: var(--current-accent);
+            text-shadow: 0 0 10px var(--current-accent);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-section {
+                padding: 50px;
+            }
+            .greeting {
+                font-size: 2.4em;
+            }
+            .digital-clock {
+                font-size: 4em;
+            }
+            .analog-clock {
+                width: 180px;
+                height: 180px;
+            }
+            .tools-panel-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+            .tool-card {
+                padding: 30px;
+                min-height: 260px;
+            }
+            .tool-card h2 {
+                font-size: 1.7em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            main {
+                width: 95%;
+                margin: 30px auto;
+                gap: 25px;
+            }
+            .hero-section {
+                padding: 40px;
+                min-height: 300px;
+            }
+            .greeting {
+                font-size: 2em;
+            }
+            .digital-clock {
+                font-size: 3.5em;
+            }
+            .analog-clock {
+                width: 150px;
+                height: 150px;
+            }
+            .hybrid-clock {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .tools-panel-grid {
+                grid-template-columns: 1fr;
+            }
+            .tool-card {
+                padding: 25px;
+                min-height: auto; /* Allow height to adjust on mobile */
+            }
+            .world-time-grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            }
+            .timer-display {
+                font-size: 2.8em;
+            }
+            .countdown-input-group input {
+                width: 60px;
+                padding: 8px 10px;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+            footer {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 30px;
+            }
+            .greeting {
+                font-size: 1.6em;
+                margin-bottom: 20px;
+            }
+            .digital-clock {
+                font-size: 2.8em;
+            }
+            .analog-clock {
+                width: 120px;
+                height: 120px;
+            }
+            .tool-card h2 {
+                font-size: 1.4em;
+            }
+            .timer-display {
+                font-size: 2.2em;
+            }
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+            .world-time-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .circular-progress-container, .day-progress-container {
+                width: 130px;
+                height: 130px;
+            }
+            .circular-progress-text, .day-progress-text {
+                font-size: 1.8em;
+            }
+        }
+
+        /* Blur Reveal Transition */
+        .blur-reveal-hidden {
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(30px);
+        }
+        .blur-reveal-visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+            transition: opacity 0.8s var(--transition-ease), filter 0.8s var(--transition-ease), transform 0.8s var(--transition-ease);
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <section class="hero-section">
+            <h1 class="greeting" id="greeting">Good Evening, Explorer!</h1>
+            <div class="hybrid-clock">
+                <div class="digital-clock" id="digitalClock">00:00:00</div>
+                <div class="analog-clock">
+                    <div class="hand hour-hand" id="hourHand"></div>
+                    <div class="hand minute-hand" id="minuteHand"></div>
+                    <div class="hand second-hand" id="secondHand"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tools-panel-grid">
+            <!-- Stopwatch -->
+            <div class="glass-card tool-card blur-reveal-hidden" id="stopwatchCard">
+                <h2>Stopwatch</h2>
+                <div class="timer-display" id="stopwatchDisplay">00:00:00.000</div>
+                <div class="timer-controls">\n                    <button class="btn" id="stopwatchStartBtn">Start</button>\n                    <button class="btn" id="stopwatchPauseBtn">Pause</button>\n                    <button class="btn" id="stopwatchResetBtn">Reset</button>\n                    <button class="btn" id="stopwatchLapBtn">Lap</button>\n                </div>
+                <ul class="lap-list" id="lapList"></ul>
+            </div>
+
+            <!-- Countdown Timer -->
+            <div class="glass-card tool-card blur-reveal-hidden" id="countdownCard">
+                <h2>Countdown Timer</h2>
+                <div class="countdown-input-group">
+                    <input type="number" id="countdownHours" value="0" min="0" max="99" placeholder="HH"> :
+                    <input type="number" id="countdownMinutes" value="0" min="0" max="59" placeholder="MM"> :
+                    <input type="number" id="countdownSeconds" value="0" min="0" max="59" placeholder="SS">
+                </div>
+                <div class="circular-progress-container">
+                    <div class="circular-progress-bg"></div>
+                    <div class="circular-progress-bar" id="countdownProgressBar" style="--progress: 0%;"></div>
+                    <div class="circular-progress-text" id="countdownDisplay">00:00:00</div>
+                </div>
+                <div class="timer-controls">
+                    <button class="btn" id="countdownStartBtn">Start</button>
+                    <button class="btn" id="countdownPauseBtn">Pause</button>
+                    <button class="btn" id="countdownResetBtn">Reset</button>
+                </div>
+                <div class="celebration-effect" id="celebrationEffect"></div>
+            </div>
+
+            <!-- Pomodoro Timer -->
+            <div class="glass-card tool-card blur-reveal-hidden" id="pomodoroCard">
+                <h2>Pomodoro Timer</h2>
+                <div class="pomodoro-modes">
+                    <button class="btn active" id="pomodoroWorkBtn">Work (25)</button>
+                    <button class="btn" id="pomodoroShortBreakBtn">Short Break (5)</button>
+                    <button class="btn" id="pomodoroLongBreakBtn">Long Break (15)</button>
+                </div>
+                <div class="circular-progress-container">
+                    <div class="circular-progress-bg"></div>
+                    <div class="circular-progress-bar" id="pomodoroProgressBar" style="--progress: 0%;"></div>
+                    <div class="circular-progress-text" id="pomodoroDisplay">25:00</div>
+                </div>
+                <div class="timer-controls">
+                    <button class="btn" id="pomodoroStartBtn">Start</button>
+                    <button class="btn" id="pomodoroPauseBtn">Pause</button>
+                    <button class="btn" id="pomodoroResetBtn">Reset</button>
+                </div>
+                <div class="pomodoro-status" id="pomodoroStatus">Ready to Work!</div>
+            </div>
+
+            <!-- Time Difference Calculator -->
+            <div class="glass-card tool-card blur-reveal-hidden" id="timeDiffCard">
+                <h2>Time Difference</h2>
+                <div class="time-diff-inputs">
+                    <input type="datetime-local" id="time1Input">
+                    <input type="datetime-local" id="time2Input">
+                </div>
+                <button class="btn" id="calculateDiffBtn">Calculate Difference</button>
+                <div class="time-diff-result" id="timeDiffResult">0 hours 0 minutes</div>
+            </div>
+
+            <!-- World Time Dashboard -->
+            <div class="glass-card tool-card blur-reveal-hidden" id="worldTimeCard">
+                <h2>World Time</h2>
+                <div class="world-time-grid" id="worldTimeGrid">
+                    <!-- World time cards will be inserted here by JS -->
+                </div>
+            </div>
+
+            <!-- Day Progress Section -->
+            <div class="glass-card tool-card blur-reveal-hidden" id="dayProgressCard">
+                <h2>Day Progress</h2>
+                <div class="day-progress-container">
+                    <div class="day-progress-bg"></div>
+                    <div class="day-progress-bar" id="dayProgressBar" style="--day-progress: 0%;"></div>
+                    <div class="day-progress-text" id="dayProgressText">0%</div>
+                </div>
+                <p style="color: var(--text-secondary);">Percentage of day passed.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="GitHub">✨</a>
+            <a href="#" aria-label="LinkedIn">🔗</a>
+            <a href="#" aria-label="Twitter">🐦</a>
+        </div>
+        <p>&copy; 2025 Time OS. All rights reserved.</p>
+    </footer>
+
+    <audio id="buttonClickSound" src="https://www.soundjay.com/buttons/button-2.mp3" preload="auto"></audio>
+    <audio id="timerEndSound" src="https://www.soundjay.com/misc/bell-ringing-05.mp3" preload="auto"></audio>
+
+    <script>
+        // --- Global State and Utility Functions ---
+        const $ = selector => document.querySelector(selector);
+        const $$ = selector => document.querySelectorAll(selector);
+
+        const buttonClickSound = $('#buttonClickSound');
+        const timerEndSound = $('#timerEndSound');
+        let soundEnabled = true; // Toggle for sound effects
+
+        function playSound(audioElement) {
+            if (soundEnabled) {
+                audioElement.currentTime = 0; // Rewind to start
+                audioElement.play().catch(e => console.warn("Audio play failed:", e));
+            }
+        }
+
+        // Apply ripple effect to all buttons
+        $$('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                playSound(buttonClickSound); // Play sound on click
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+
+                this.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+            });
+        });
+
+        // --- Theme Management ---
+        function applyTheme(isNight) {
+            const root = document.documentElement;
+            if (isNight) {
+                root.style.setProperty('--current-accent', 'var(--night-accent-color)');
+                root.style.setProperty('--current-bg-gradient-start', 'var(--night-gradient-start)');
+                root.style.setProperty('--current-bg-gradient-end', 'var(--night-gradient-end)');
+            } else {
+                root.style.setProperty('--current-accent', 'var(--morning-accent-color)');
+                root.style.setProperty('--current-bg-gradient-start', 'var(--morning-gradient-start)');
+                root.style.setProperty('--current-bg-gradient-end', 'var(--morning-gradient-end)');
+            }
+        }
+
+        function updateThemeBasedOnTime() {
+            const now = new Date();
+            const hour = now.getHours();
+            const isNight = hour >= 19 || hour < 6; // 7 PM to 6 AM is night
+            applyTheme(isNight);
+        }
+
+        // --- Hero Section: Hybrid Clock & Greeting ---
+        const greetingElement = $('#greeting');
+        const digitalClockElement = $('#digitalClock');
+        const hourHand = $('#hourHand');
+        const minuteHand = $('#minuteHand');
+        const secondHand = $('#secondHand');
+
+        function updateGreeting(hour) {
+            if (hour >= 5 && hour < 12) {
+                greetingElement.textContent = "Good Morning, Explorer!";
+            } else if (hour >= 12 && hour < 18) {
+                greetingElement.textContent = "Good Afternoon, Explorer!";
+            } else {
+                greetingElement.textContent = "Good Evening, Explorer!";
+            }
+        }
+
+        function updateClocks() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const milliseconds = now.getMilliseconds();
+
+            // Digital Clock
+            const formattedTime = [hours, minutes, seconds]
+                .map(unit => unit < 10 ? '0' + unit : unit)
+                .join(':');
+            digitalClockElement.textContent = formattedTime;
+
+            // Analog Clock (smooth sweep)
+            // Total seconds in 12 hours: 12 * 3600 = 43200
+            // Total seconds in an hour: 3600
+            // Total seconds in a minute: 60
+            const totalSeconds = hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
+
+            const secondDegrees = (totalSeconds % 60) * 6; // 360 degrees / 60 seconds
+            const minuteDegrees = (totalSeconds / 60 % 60) * 6; // 360 degrees / 60 minutes
+            const hourDegrees = (totalSeconds / 3600 % 12) * 30; // 360 degrees / 12 hours
+
+            secondHand.style.setProperty('--rotation', `${secondDegrees}deg`);
+            minuteHand.style.setProperty('--rotation', `${minuteDegrees}deg`);
+            hourHand.style.setProperty('--rotation', `${hourDegrees}deg`);
+
+            updateGreeting(hours); // Update greeting based on current hour
+            updateDayProgress(now); // Update day progress
+        }
+
+        // --- Day Progress Section ---
+        const dayProgressBar = $('#dayProgressBar');
+        const dayProgressText = $('#dayProgressText');
+
+        function updateDayProgress(now) {
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+            
+            const totalDayMilliseconds = endOfDay.getTime() - startOfDay.getTime();
+            const elapsedMilliseconds = now.getTime() - startOfDay.getTime();
+            const progress = (elapsedMilliseconds / totalDayMilliseconds) * 100;
+
+            dayProgressBar.style.setProperty('--day-progress', `${progress.toFixed(2)}%`);
+            dayProgressText.textContent = `${Math.floor(progress)}%`;
+        }
+
+
+        // --- World Time Dashboard ---
+        const worldTimeGrid = $('#worldTimeGrid');
+        const timezones = [
+            { city: 'London', zone: 'Europe/London' },
+            { city: 'New York', zone: 'America/New_York' },
+            { city: 'Tokyo', zone: 'Asia/Tokyo' },
+            { city: 'Sydney', zone: 'Australia/Sydney' },
+            { city: 'Dubai', zone: 'Asia/Dubai' },
+            { city: 'Paris', zone: 'Europe/Paris' },
+            { city: 'Mumbai', zone: 'Asia/Kolkata' },
+            { city: 'Rio', zone: 'America/Sao_Paulo' },
+            { city: 'Singapore', zone: 'Asia/Singapore' },
+            { city: 'Cairo', zone: 'Africa/Cairo' },
+            { city: 'Mexico City', zone: 'America/Mexico_City' },
+            { city: 'Local', zone: Intl.DateTimeFormat().resolvedOptions().timeZone } // Auto-detect user timezone
+        ];
+
+        function createWorldTimeCard(city, zone) {
+            const card = document.createElement('div');
+            card.classList.add('glass-card', 'world-time-card');
+            card.innerHTML = `
+                <div class="city-name">${city}</div>
+                <div class="time-display"></div>
+                <div class="date-display"></div>
+            `;
+            worldTimeGrid.appendChild(card);
+            return card;
+        }
+
+        const worldTimeCards = timezones.map(tz => createWorldTimeCard(tz.city, tz.zone));
+
+        function updateWorldTimes() {
+            worldTimeCards.forEach((card, index) => {
+                const { city, zone } = timezones[index];
+                const now = new Date();
+                const timeOptions = {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                    timeZone: zone
+                };
+                const dateOptions = {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    timeZone: zone
+                };
+
+                const timeString = now.toLocaleTimeString('en-US', timeOptions);
+                const dateString = now.toLocaleDateString('en-US', dateOptions);
+
+                card.querySelector('.time-display').textContent = timeString;
+                card.querySelector('.date-display').textContent = dateString;
+            });
+        }
+
+        // --- Stopwatch ---
+        const stopwatchDisplay = $('#stopwatchDisplay');
+        const stopwatchStartBtn = $('#stopwatchStartBtn');
+        const stopwatchPauseBtn = $('#stopwatchPauseBtn');
+        const stopwatchResetBtn = $('#stopwatchResetBtn');
+        const stopwatchLapBtn = $('#stopwatchLapBtn');
+        const lapList = $('#lapList');
+
+        let stopwatchStartTime;
+        let stopwatchElapsedTime = 0;
+        let stopwatchAnimationId;
+        let stopwatchRunning = false;
+        let lapCounter = 0;
+
+        function formatTime(ms) {
+            const hours = Math.floor(ms / 3600000);
+            ms %= 3600000;
+            const minutes = Math.floor(ms / 60000);
+            ms %= 60000;
+            const seconds = Math.floor(ms / 1000);
+            ms %= 1000;
+            const milliseconds = Math.floor(ms);
+
+            return [hours, minutes, seconds]
+                .map(unit => unit < 10 ? '0' + unit : unit)
+                .join(':') + `.${milliseconds.toString().padStart(3, '0')}`;
+        }
+
+        function updateStopwatch() {
+            if (stopwatchRunning) {
+                const currentTime = performance.now();
+                stopwatchElapsedTime = currentTime - stopwatchStartTime;
+                stopwatchDisplay.textContent = formatTime(stopwatchElapsedTime);
+                stopwatchAnimationId = requestAnimationFrame(updateStopwatch);
+            }
+        }
+
+        stopwatchStartBtn.addEventListener('click', () => {
+            if (!stopwatchRunning) {
+                stopwatchStartTime = performance.now() - stopwatchElapsedTime; // Adjust start time for pause/resume
+                stopwatchRunning = true;
+                stopwatchAnimationId = requestAnimationFrame(updateStopwatch);
+            }
+        });
+
+        stopwatchPauseBtn.addEventListener('click', () => {
+            if (stopwatchRunning) {
+                cancelAnimationFrame(stopwatchAnimationId);
+                stopwatchRunning = false;
+            }
+        });
+
+        stopwatchResetBtn.addEventListener('click', () => {
+            cancelAnimationFrame(stopwatchAnimationId);
+            stopwatchRunning = false;
+            stopwatchElapsedTime = 0;
+            lapCounter = 0;
+            stopwatchDisplay.textContent = formatTime(0);
+            lapList.innerHTML = '';
+        });
+
+        stopwatchLapBtn.addEventListener('click', () => {
+            if (stopwatchRunning) {
+                lapCounter++;
+                const lapTime = formatTime(stopwatchElapsedTime);
+                const lapItem = document.createElement('li');
+                lapItem.classList.add('lap-item');
+                lapItem.innerHTML = `<span>Lap ${lapCounter}:</span> <span>${lapTime}</span>`;
+                lapList.prepend(lapItem); // Add to top
+            }
+        });
+
+        // --- Countdown Timer ---
+        const countdownHoursInput = $('#countdownHours');
+        const countdownMinutesInput = $('#countdownMinutes');
+        const countdownSecondsInput = $('#countdownSeconds');
+        const countdownDisplay = $('#countdownDisplay');
+        const countdownProgressBar = $('#countdownProgressBar');
+        const countdownStartBtn = $('#countdownStartBtn');
+        const countdownPauseBtn = $('#countdownPauseBtn');
+        const countdownResetBtn = $('#countdownResetBtn');
+        const celebrationEffect = $('#celebrationEffect');
+
+        let countdownTotalSeconds = 0;
+        let countdownRemainingSeconds = 0;
+        let countdownAnimationId;
+        let countdownRunning = false;
+        let countdownStartTime;
+
+        function setCountdownTime() {
+            const h = parseInt(countdownHoursInput.value) || 0;
+            const m = parseInt(countdownMinutesInput.value) || 0;
+            const s = parseInt(countdownSecondsInput.value) || 0;
+            countdownTotalSeconds = h * 3600 + m * 60 + s;
+            countdownRemainingSeconds = countdownTotalSeconds;
+            updateCountdownDisplay();
+            updateCountdownProgressBar();
+        }
+
+        function updateCountdownDisplay() {
+            const h = Math.floor(countdownRemainingSeconds / 3600);
+            const m = Math.floor((countdownRemainingSeconds % 3600) / 60);
+            const s = Math.floor(countdownRemainingSeconds % 60);
+            countdownDisplay.textContent = [h, m, s]
+                .map(unit => unit < 10 ? '0' + unit : unit)
+                .join(':');
+        }
+
+        function updateCountdownProgressBar() {
+            const progress = countdownTotalSeconds === 0 ? 0 : (countdownTotalSeconds - countdownRemainingSeconds) / countdownTotalSeconds * 100;
+            countdownProgressBar.style.setProperty('--progress', `${progress}%`);
+        }
+
+        function runCountdown() {
+            if (countdownRunning && countdownRemainingSeconds > 0) {
+                const elapsed = (performance.now() - countdownStartTime) / 1000;
+                countdownRemainingSeconds = countdownTotalSeconds - Math.floor(elapsed);
+
+                if (countdownRemainingSeconds <= 0) {
+                    countdownRemainingSeconds = 0;
+                    countdownRunning = false;
+                    cancelAnimationFrame(countdownAnimationId);
+                    triggerCelebration();
+                    playSound(timerEndSound);
+                }
+                updateCountdownDisplay();
+                updateCountdownProgressBar();
+                countdownAnimationId = requestAnimationFrame(runCountdown);
+            } else if (countdownRemainingSeconds === 0 && countdownRunning) {
+                countdownRunning = false;
+                cancelAnimationFrame(countdownAnimationId);
+                triggerCelebration();
+                playSound(timerEndSound);
+            }
+        }
+
+        countdownStartBtn.addEventListener('click', () => {
+            if (!countdownRunning) {
+                if (countdownRemainingSeconds <= 0) {
+                    setCountdownTime(); // Reset if already at 0
+                }
+                if (countdownTotalSeconds > 0) { // Only start if a valid time is set
+                    countdownStartTime = performance.now() - (countdownTotalSeconds - countdownRemainingSeconds) * 1000;
+                    countdownRunning = true;
+                    countdownAnimationId = requestAnimationFrame(runCountdown);
+                }
+            }
+        });
+
+        countdownPauseBtn.addEventListener('click', () => {
+            if (countdownRunning) {
+                cancelAnimationFrame(countdownAnimationId);
+                countdownRunning = false;
+            }
+        });
+
+        countdownResetBtn.addEventListener('click', () => {
+            cancelAnimationFrame(countdownAnimationId);
+            countdownRunning = false;
+            setCountdownTime(); // Reset to initial input
+            celebrationEffect.innerHTML = ''; // Clear confetti
+        });
+
+        countdownHoursInput.addEventListener('input', setCountdownTime);
+        countdownMinutesInput.addEventListener('input', setCountdownTime);
+        countdownSecondsInput.addEventListener('input', setCountdownTime);
+
+        function triggerCelebration() {
+            celebrationEffect.innerHTML = ''; // Clear previous confetti
+            for (let i = 0; i < 30; i++) { // Fewer confetti for elegance
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                const x = Math.random() * 100 + 'vw';
+                const y = Math.random() * 100 + 'vh';
+                const xEnd = (Math.random() - 0.5) * 300 + 'px'; // Wider spread
+                const yEnd = Math.random() * 300 + 'px';
+                confetti.style.setProperty('--x', x);
+                confetti.style.setProperty('--y', y);
+                confetti.style.setProperty('--x-end', xEnd);
+                confetti.style.setProperty('--y-end', yEnd);
+                // Muted random colors
+                const hue = Math.random() * 360;
+                confetti.style.background = `hsl(${hue}, 50%, 70%)`; // Softer colors
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = `${Math.random() * 100}%`;
+                confetti.style.animationDelay = `${Math.random() * 0.8}s`;
+                celebrationEffect.appendChild(confetti);
+            }
+        }
+
+        // Initialize countdown display
+        setCountdownTime();
+
+        // --- Pomodoro Timer ---
+        const pomodoroDisplay = $('#pomodoroDisplay');
+        const pomodoroProgressBar = $('#pomodoroProgressBar');
+        const pomodoroWorkBtn = $('#pomodoroWorkBtn');
+        const pomodoroShortBreakBtn = $('#pomodoroShortBreakBtn');
+        const pomodoroLongBreakBtn = $('#pomodoroLongBreakBtn');
+        const pomodoroStartBtn = $('#pomodoroStartBtn');
+        const pomodoroPauseBtn = $('#pomodoroPauseBtn');
+        const pomodoroResetBtn = $('#pomodoroResetBtn');
+        const pomodoroStatus = $('#pomodoroStatus');
+
+        const POMODORO_WORK_TIME = 25 * 60; // 25 minutes
+        const POMODORO_SHORT_BREAK = 5 * 60; // 5 minutes
+        const POMODORO_LONG_BREAK = 15 * 60; // 15 minutes
+
+        let pomodoroTotalSeconds = POMODORO_WORK_TIME;
+        let pomodoroRemainingSeconds = POMODORO_WORK_TIME;
+        let pomodoroAnimationId;
+        let pomodoroRunning = false;
+        let pomodoroStartTime;
+        let currentPomodoroMode = 'work'; // 'work', 'short-break', 'long-break'
+
+        function updatePomodoroDisplay() {
+            const m = Math.floor(pomodoroRemainingSeconds / 60);
+            const s = Math.floor(pomodoroRemainingSeconds % 60);
+            pomodoroDisplay.textContent = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+        }
+
+        function updatePomodoroProgressBar() {
+            const progress = (pomodoroTotalSeconds - pomodoroRemainingSeconds) / pomodoroTotalSeconds * 100;
+            pomodoroProgressBar.style.setProperty('--progress', `${progress}%`);
+        }
+
+        function runPomodoro() {
+            if (pomodoroRunning && pomodoroRemainingSeconds > 0) {
+                const elapsed = (performance.now() - pomodoroStartTime) / 1000;
+                pomodoroRemainingSeconds = pomodoroTotalSeconds - Math.floor(elapsed);
+
+                if (pomodoroRemainingSeconds <= 0) {
+                    pomodoroRemainingSeconds = 0;
+                    pomodoroRunning = false;
+                    cancelAnimationFrame(pomodoroAnimationId);
+                    playSound(timerEndSound);
+                    pomodoroStatus.textContent = "Time's up! Take a break or start next session.";
+                }
+                updatePomodoroDisplay();
+                updatePomodoroProgressBar();
+                pomodoroAnimationId = requestAnimationFrame(runPomodoro);
+            } else if (pomodoroRemainingSeconds === 0 && pomodoroRunning) {
+                pomodoroRunning = false;
+                cancelAnimationFrame(pomodoroAnimationId);
+                playSound(timerEndSound);
+                pomodoroStatus.textContent = "Time's up! Take a break or start next session.";
+            }
+        }
+
+        function setPomodoroMode(mode) {
+            currentPomodoroMode = mode;
+            $$('.pomodoro-modes .btn').forEach(btn => btn.classList.remove('active'));
+            if (mode === 'work') {
+                pomodoroTotalSeconds = POMODORO_WORK_TIME;
+                pomodoroWorkBtn.classList.add('active');
+                pomodoroStatus.textContent = "Ready to Work!";
+            } else if (mode === 'short-break') {
+                pomodoroTotalSeconds = POMODORO_SHORT_BREAK;
+                pomodoroShortBreakBtn.classList.add('active');
+                pomodoroStatus.textContent = "Enjoy your Short Break!";
+            } else if (mode === 'long-break') {
+                pomodoroTotalSeconds = POMODORO_LONG_BREAK;
+                pomodoroLongBreakBtn.classList.add('active');
+                pomodoroStatus.textContent = "Enjoy your Long Break!";
+            }
+            pomodoroRemainingSeconds = pomodoroTotalSeconds;
+            updatePomodoroDisplay();
+            updatePomodoroProgressBar();
+            cancelAnimationFrame(pomodoroAnimationId);
+            pomodoroRunning = false;
+        }
+
+        pomodoroWorkBtn.addEventListener('click', () => setPomodoroMode('work'));
+        pomodoroShortBreakBtn.addEventListener('click', () => setPomodoroMode('short-break'));
+        pomodoroLongBreakBtn.addEventListener('click', () => setPomodoroMode('long-break'));
+
+        pomodoroStartBtn.addEventListener('click', () => {
+            if (!pomodoroRunning) {
+                if (pomodoroRemainingSeconds <= 0) {
+                    setPomodoroMode(currentPomodoroMode); // Reset if already at 0
+                }
+                pomodoroStartTime = performance.now() - (pomodoroTotalSeconds - pomodoroRemainingSeconds) * 1000;
+                pomodoroRunning = true;
+                pomodoroAnimationId = requestAnimationFrame(runPomodoro);
+            }
+        });
+
+        pomodoroPauseBtn.addEventListener('click', () => {
+            if (pomodoroRunning) {
+                cancelAnimationFrame(pomodoroAnimationId);
+                pomodoroRunning = false;
+                pomodoroStatus.textContent = "Paused.";
+            }
+        });
+
+        pomodoroResetBtn.addEventListener('click', () => {
+            cancelAnimationFrame(pomodoroAnimationId);
+            pomodoroRunning = false;
+            setPomodoroMode(currentPomodoroMode); // Reset to current mode's initial time
+            pomodoroStatus.textContent = "Timer Reset.";
+        });
+
+        // Initialize Pomodoro
+        setPomodoroMode('work');
+
+        // --- Time Difference Calculator ---
+        const time1Input = $('#time1Input');
+        const time2Input = $('#time2Input');
+        const calculateDiffBtn = $('#calculateDiffBtn');
+        const timeDiffResult = $('#timeDiffResult');
+
+        function calculateTimeDifference() {
+            const date1 = new Date(time1Input.value);
+            const date2 = new Date(time2Input.value);
+
+            if (isNaN(date1.getTime()) || isNaN(date2.getTime())) {
+                timeDiffResult.textContent = "Invalid date/time input.";
+                return;
+            }
+
+            const diffMs = Math.abs(date2.getTime() - date1.getTime());
+            const diffSeconds = Math.floor(diffMs / 1000);
+            const hours = Math.floor(diffSeconds / 3600);
+            const minutes = Math.floor((diffSeconds % 3600) / 60);
+            const seconds = diffSeconds % 60;
+
+            let result = [];
+            if (hours > 0) result.push(`${hours} hour${hours !== 1 ? 's' : ''}`);
+            if (minutes > 0) result.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
+            if (seconds > 0 || result.length === 0) result.push(`${seconds} second${seconds !== 1 ? 's' : ''}`); // Show seconds if no larger units
+
+            timeDiffResult.textContent = result.join(' ');
+        }
+
+        calculateDiffBtn.addEventListener('click', calculateTimeDifference);
+
+        // Set initial values for time difference calculator to current time
+        const now = new Date();
+        const nowIso = now.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
+        time1Input.value = nowIso;
+        now.setHours(now.getHours() + 1); // Set second time to 1 hour later
+        time2Input.value = now.toISOString().slice(0, 16);
+        calculateTimeDifference(); // Calculate initial difference
+
+
+        // --- Animation Loop for Clocks and World Time ---
+        function animateDashboard() {
+            updateClocks();
+            updateWorldTimes();
+            requestAnimationFrame(animateDashboard);
+        }
+
+        // --- Initializations ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateThemeBasedOnTime(); // Set initial theme
+            animateDashboard(); // Start the main animation loop
+
+            // Trigger blur-reveal for tool cards
+            const toolCards = $$('.tool-card');
+            toolCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.remove('blur-reveal-hidden');
+                    card.classList.add('blur-reveal-visible');
+                }, index * 120); // Staggered reveal
+            });
+        });
+
+        // Update theme every minute to catch transitions (e.g., 5:59 PM to 6:00 PM)
+        setInterval(updateThemeBasedOnTime, 60 * 1000);
+
+        // Optional: Toggle sound with a key press (e.g., 's')
+        // document.addEventListener('keydown', (e) => {
+        //     if (e.key === 's') {
+        //         soundEnabled = !soundEnabled;
+        //         console.log('Sound enabled:', soundEnabled);
+        //     }
+        // });
+    </script>
+</body>
+</html>
